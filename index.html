@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Port Harcourt Air Study</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+/* Layout: one narrow column. Header, a two-step tracker, then one panel at a time (survey, claim form, done). */
+:root {
+  --bg: #FFFFFF;
+  --bg-a: #FFFFFF;
+  --bg-b: #FFFFFF;
+  --bg-c: #FFFFFF;
+  --surface: #FFFFFF;
+  --ink: #13231F;
+  --muted: #51635D;
+  --line: #CBD6D0;
+  --accent: #1B6B66;
+  --accent-ink: #FFFFFF;
+  --flare: #C9501C;
+  --ok: #1F7A4D;
+  --err: #B3261E;
+  --font-display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Inter", "Segoe UI", system-ui, sans-serif;
+}
+:root { color-scheme: light; }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: var(--bg);
+  background-image: linear-gradient(160deg, var(--bg-a) 0%, var(--bg-b) 50%, var(--bg-c) 100%);
+  background-repeat: no-repeat;
+  background-size: cover;
+  color: var(--ink);
+  font: 400 16px/1.55 var(--font-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 32px 56px;
+}
+.wrap { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+
+.kicker { margin: 0; font: 600 12px/1 var(--font-body); letter-spacing: .12em; text-transform: uppercase; color: var(--flare); }
+h1 { margin: 10px 0 0; font: 700 clamp(26px, 6.5vw, 34px)/1.15 var(--font-display); text-wrap: balance; letter-spacing: -.01em; }
+.lede { margin: 0 0 8px; color: var(--ink); max-width: 65ch; }
+.byline { margin: 0; font-size: 14px; color: var(--muted); }
+
+.steps { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.steps li { display: flex; flex-direction: column; gap: 6px; padding-top: 10px; border-top: 3px solid var(--line); font-size: 14px; color: var(--muted); }
+.steps li b { font: 600 12px/1 var(--font-body); letter-spacing: .1em; text-transform: uppercase; }
+.steps li[aria-current="step"] { border-top-color: var(--flare); color: var(--ink); }
+.steps li.done { border-top-color: var(--accent); color: var(--ink); }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 22px; display: flex; flex-direction: column; gap: 18px; }
+.panel h2 { margin: 0; font: 600 21px/1.25 var(--font-display); }
+.panel p { margin: 0; }
+.muted { color: var(--muted); font-size: 14px; }
+
+.todo { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 10px; }
+.todo li::marker { font-weight: 600; color: var(--flare); }
+
+.actions { display: flex; flex-direction: column; gap: 10px; }
+.btn {
+  appearance: none; display: inline-flex; align-items: center; justify-content: center;
+  min-height: 48px; padding: 12px 20px; border-radius: 10px; border: 1.5px solid var(--accent);
+  background: transparent; color: var(--accent); font: 600 16px/1.2 var(--font-body);
+  text-decoration: none; cursor: pointer;
+}
+.btn.primary { background: var(--accent); color: var(--accent-ink); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn:focus-visible, input:focus-visible, .drop:focus-within { outline: 3px solid var(--flare); outline-offset: 2px; }
+
+form { display: flex; flex-direction: column; gap: 20px; }
+.field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+label, .label { font-weight: 600; font-size: 15px; }
+.hint { font-size: 13px; color: var(--muted); }
+input[type="text"] {
+  width: 100%; min-height: 48px; padding: 10px 12px; border-radius: 10px;
+  border: 1.5px solid var(--line); background: var(--bg); color: var(--ink); font: 400 16px/1.3 var(--font-body);
+}
+input.mono { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 14px; }
+input[aria-invalid="true"] { border-color: var(--err); }
+.error { min-height: 1.2em; margin: 0; font-size: 13px; color: var(--err); }
+
+.drop {
+  position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  min-height: 120px; padding: 16px; text-align: center; border: 1.5px dashed var(--line); border-radius: 10px; background: var(--bg);
+}
+.drop input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.drop strong { font-size: 15px; }
+.preview { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.preview img { width: 72px; height: 72px; object-fit: cover; border-radius: 8px; border: 1px solid var(--line); flex: none; }
+.preview span { min-width: 0; overflow-wrap: anywhere; font-size: 14px; }
+.preview button { margin-left: auto; flex: none; background: none; border: 0; color: var(--accent); font: 600 14px var(--font-body); cursor: pointer; min-height: 44px; padding: 0 4px; }
+
+.network { display: flex; gap: 10px; align-items: flex-start; padding: 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); font-size: 14px; }
+.chip { flex: none; padding: 3px 8px; border-radius: 6px; background: var(--flare); color: #fff; font: 700 12px/1.3 var(--font-body); letter-spacing: .06em; }
+
+.check { display: flex; gap: 12px; align-items: flex-start; font-weight: 400; font-size: 14px; }
+.check input { width: 22px; height: 22px; margin: 1px 0 0; flex: none; accent-color: var(--accent); }
+
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.banner { padding: 12px; border-radius: 10px; border: 1px solid var(--err); color: var(--err); font-size: 14px; }
+.tick { width: 44px; height: 44px; border-radius: 50%; background: var(--ok); color: #fff; display: grid; place-items: center; font-size: 24px; }
+.footnote { font-size: 13px; color: var(--muted); }
+@media (prefers-reduced-motion: no-preference) { .btn { transition: background-color .15s, opacity .15s; } }
+</style>
+</head>
+<body>
+<main class="wrap">
+
+  <header>
+    <p class="kicker">Air quality research &middot; Port Harcourt</p>
+    <h1>Complete our survey and earn a share $1000 USDC</h1>
+  </header>
+
+  <ol class="steps" aria-label="Progress">
+    <li id="tab1" aria-current="step"><b>Step 1</b>Take the survey</li>
+    <li id="tab2"><b>Step 2</b>Claim your reward</li>
+  </ol>
+
+  <section class="panel" id="step1" aria-labelledby="h-step1">
+    <h2 id="h-step1">Take the survey</h2>
+    <ol class="todo">
+      <li>Open the survey and answer every question.</li>
+      <li>On the last page, take a screenshot that shows you have finished.</li>
+      <li>Come back here and tap Continue to claim your reward.</li>
+    </ol>
+    <div class="actions">
+      <a class="btn primary" id="openSurvey" href="#" target="_blank" rel="noopener">Open the survey</a>
+      <button class="btn" id="toStep2" type="button" disabled>I have finished, continue</button>
+      <p class="muted" id="gateHint">Continue unlocks after you open the survey.</p>
+    </div>
+  </section>
+
+  <section class="panel" id="step2" aria-labelledby="h-step2" hidden>
+    <h2 id="h-step2">Claim your reward</h2>
+    <form id="claim" novalidate>
+      <div class="field">
+        <label for="name">Full name</label>
+        <input id="name" name="name" type="text" autocomplete="name" maxlength="120" required>
+        <p class="error" id="nameErr" role="alert"></p>
+      </div>
+
+      <div class="field">
+        <span class="label" id="shotLabel">Screenshot of the finished survey</span>
+        <div class="drop" id="drop">
+          <strong>Tap to choose a screenshot</strong>
+          <span class="hint">PNG or JPG from your phone or computer</span>
+          <input id="shot" type="file" accept="image/*" aria-labelledby="shotLabel">
+        </div>
+        <div class="preview" id="preview" hidden>
+          <img id="previewImg" alt="Your screenshot">
+          <span id="previewName"></span>
+          <button type="button" id="removeShot">Remove</button>
+        </div>
+        <p class="error" id="shotErr" role="alert"></p>
+      </div>
+
+      <div class="field">
+        <label for="wallet">USDC wallet address</label>
+        <input id="wallet" class="mono" name="wallet" type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="0x..." required>
+        <div class="network"><span class="chip">BASE</span><span>Use an address that can receive USDC on the <strong>Base network</strong>. Funds sent to the wrong network may be lost, and I cannot recover them.</span></div>
+        <p class="error" id="walletErr" role="alert"></p>
+      </div>
+
+      <div class="hp" aria-hidden="true"><label>Leave this empty <input id="hp" type="text" tabindex="-1" autocomplete="off"></label></div>
+
+      <div class="field">
+        <label class="check" for="consent">
+          <input id="consent" type="checkbox">
+          <span>I am 18 or older, I completed the survey, and I agree that my name, screenshot and wallet address are used to verify my completion and send my reward.</span>
+        </label>
+        <p class="error" id="consentErr" role="alert"></p>
+      </div>
+
+      <div class="banner" id="submitErr" role="alert" hidden></div>
+      <button class="btn primary" id="submit" type="submit">Submit and claim reward</button>
+      <p class="footnote">These details are kept separate from your survey answers and are not shown to anyone else.</p>
+    </form>
+  </section>
+
+  <section class="panel" id="done" aria-labelledby="h-done" hidden>
+    <div class="tick" aria-hidden="true">&#10003;</div>
+    <h2 id="h-done">Submitted. Thank you.</h2>
+    <p>Your claim is in. Rewards are sent in USDC on Base once your screenshot has been checked.</p>
+    <p class="banner" id="previewNote" hidden>Preview mode: nothing was sent. The site owner needs to set ENDPOINT in index.html.</p>
+  </section>
+
+</main>
+
+<script>
+/* ---- Set these two values before publishing ---- */
+var CONFIG = {
+  SURVEY_URL: "https://qualtricsxmrp5nbdj3q.qualtrics.com/jfe/form/SV_6mQ42yjbAd3FJFY",
+  ENDPOINT: "https://script.google.com/macros/s/AKfycbzvhuiq4YqcWCxwV_6hT4KN_nBTQbxKcE52pwmP0OU0zh-_9oj8Sn_Q5T55DUBkCgjAzw/exec" /* paste your Google Apps Script web app URL here */
+};
+
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var shotData = null, shotName = "", busy = false;
+
+  $("openSurvey").href = CONFIG.SURVEY_URL;
+
+  try { if (localStorage.getItem("claimed") === "1") { show("done"); setSteps(3); } } catch (e) {}
+
+  function show(id) {
+    ["step1", "step2", "done"].forEach(function (s) { $(s).hidden = (s !== id); });
+    window.scrollTo(0, 0);
+  }
+  function setSteps(n) {
+    $("tab1").className = n > 1 ? "done" : ""; $("tab2").className = n > 2 ? "done" : "";
+    $("tab1").removeAttribute("aria-current"); $("tab2").removeAttribute("aria-current");
+    if (n === 1) $("tab1").setAttribute("aria-current", "step");
+    if (n === 2) $("tab2").setAttribute("aria-current", "step");
+  }
+
+  $("openSurvey").addEventListener("click", function () {
+    $("toStep2").disabled = false;
+    $("gateHint").textContent = "When you have finished and taken your screenshot, tap Continue.";
+  });
+  $("toStep2").addEventListener("click", function () { show("step2"); setSteps(2); });
+
+  function compress(file) {
+    return new Promise(function (resolve, reject) {
+      var url = URL.createObjectURL(file), img = new Image();
+      img.onload = function () {
+        var max = 1400, s = Math.min(1, max / Math.max(img.width, img.height));
+        var c = document.createElement("canvas");
+        c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+        var ctx = c.getContext("2d");
+        ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
+        ctx.drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(url);
+        resolve(c.toDataURL("image/jpeg", 0.78));
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error("bad image")); };
+      img.src = url;
+    });
+  }
+
+  $("shot").addEventListener("change", function (e) {
+    var f = e.target.files && e.target.files[0];
+    $("shotErr").textContent = "";
+    if (!f) return;
+    if (!/^image\//.test(f.type)) { $("shotErr").textContent = "Please choose an image file."; return; }
+    if (f.size > 15 * 1024 * 1024) { $("shotErr").textContent = "That image is too large. Choose one under 15 MB."; return; }
+    compress(f).then(function (data) {
+      shotData = data; shotName = f.name || "screenshot.jpg";
+      $("previewImg").src = data; $("previewName").textContent = shotName;
+      $("preview").hidden = false; $("drop").hidden = true;
+    }).catch(function () { $("shotErr").textContent = "Could not read that image. Try another screenshot."; });
+  });
+  $("removeShot").addEventListener("click", function () {
+    shotData = null; shotName = ""; $("shot").value = "";
+    $("preview").hidden = true; $("drop").hidden = false;
+  });
+
+  var ADDR = /^0x[a-fA-F0-9]{40}$/;
+  function setErr(inputId, errId, msg) {
+    $(errId).textContent = msg;
+    var el = $(inputId); if (el) el.setAttribute("aria-invalid", msg ? "true" : "false");
+  }
+  function validate() {
+    var ok = true, first = null;
+    var name = $("name").value.trim();
+    var wallet = $("wallet").value.trim();
+    setErr("name", "nameErr", name.length < 2 ? "Enter your full name." : "");
+    if (name.length < 2) { ok = false; first = first || $("name"); }
+    $("shotErr").textContent = shotData ? "" : "Add your screenshot of the finished survey.";
+    if (!shotData) { ok = false; first = first || $("shot"); }
+    var wmsg = "";
+    if (!wallet) wmsg = "Enter your wallet address.";
+    else if (!ADDR.test(wallet)) wmsg = "This is not a valid address. It starts with 0x and has 42 characters in total.";
+    else if (/^0x0{40}$/i.test(wallet)) wmsg = "That address cannot receive funds.";
+    setErr("wallet", "walletErr", wmsg);
+    if (wmsg) { ok = false; first = first || $("wallet"); }
+    $("consentErr").textContent = $("consent").checked ? "" : "Please tick the box to continue.";
+    if (!$("consent").checked) { ok = false; first = first || $("consent"); }
+    if (first) first.focus();
+    return ok;
+  }
+
+  $("claim").addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (busy) return;
+    $("submitErr").hidden = true;
+    if (!validate()) return;
+
+    if (!CONFIG.ENDPOINT) { $("previewNote").hidden = false; show("done"); setSteps(3); return; }
+
+    busy = true; $("submit").disabled = true; $("submit").textContent = "Submitting...";
+    var payload = {
+      name: $("name").value.trim(),
+      wallet: $("wallet").value.trim(),
+      screenshot: shotData,
+      consent: $("consent").checked,
+      hp: $("hp").value
+    };
+    fetch(CONFIG.ENDPOINT, { method: "POST", body: JSON.stringify(payload) })
+      .then(function (r) { return r.json(); })
+      .then(function (res) {
+        if (res && res.ok) {
+          try { localStorage.setItem("claimed", "1");
+            if (res.claimId) {
+              localStorage.setItem("claimId", res.claimId);
+            }
+           } catch (e) {}
+          show("done"); setSteps(3);
+        } else if (res && res.error === "duplicate") {
+          fail("This wallet address has already been used to claim a reward.");
+        } else {
+          fail("Your details could not be saved. Check them and try again.");
+        }
+      })
+      .catch(function () { fail("The connection failed. Check your internet and try again."); });
+  });
+
+  function fail(msg) {
+    busy = false; $("submit").disabled = false; $("submit").textContent = "Submit and claim reward";
+    $("submitErr").textContent = msg; $("submitErr").hidden = false;
+  }
+})();
+</script>
+</body>
+</html>
